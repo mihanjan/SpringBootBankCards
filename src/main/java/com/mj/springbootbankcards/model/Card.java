@@ -46,14 +46,14 @@ public class Card extends BaseEntity {
 
     public static Card fromCardSaveTo(CardSaveTo cardSaveTo, Client client, BankCardType bankCardType) {
         Card card = new Card();
-        card.embossingName = cardSaveTo.getEmbossingName();
-        card.client = client;
-        card.bankCardType = bankCardType;
-        card.contractNumber = String.valueOf(counterContractNumber.incrementAndGet());
         card.number = String.valueOf(counterNumber.incrementAndGet());
+        card.contractNumber = String.valueOf(counterContractNumber.incrementAndGet());
+        card.embossingName = cardSaveTo.getEmbossingName();
         card.openDate = LocalDate.now();
         card.expireDate = card.openDate.plusYears(bankCardType.getValidity());
         card.locked = false;
+        card.client = client;
+        card.bankCardType = bankCardType;
         return card;
     }
 }
