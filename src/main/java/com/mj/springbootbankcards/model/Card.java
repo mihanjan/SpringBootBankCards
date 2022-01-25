@@ -1,8 +1,7 @@
 package com.mj.springbootbankcards.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.mj.springbootbankcards.to.CardSaveTo;
 import lombok.*;
 
 import javax.persistence.Entity;
@@ -23,36 +22,38 @@ public class Card extends BaseEntity {
     private static final AtomicLong counterContractNumber = new AtomicLong(10000L);
     private static final AtomicLong counterNumber = new AtomicLong(1000000000000000L);
 
-    private LocalDate expireDate;
-
-    private LocalDate openDate;
+    private String number;
 
     private String contractNumber;
 
+    private String embossingName;
+
+    private LocalDate openDate;
+
+    private LocalDate expireDate;
+
     private boolean locked;
 
-    private String number;
+    private LocalDate lockDate;
 
     @ManyToOne(fetch = FetchType.EAGER)
     private BankCardType bankCardType;
-
-    private String embossingName;
-
-    private LocalDate lockDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @JsonIgnore
     private Client client;
 
-//    public Card(Client client, BankCardType bankCardType, String embossingName) {
-//        this.client = client;
-//        this.bankCardType = bankCardType;
-//        this.embossingName = embossingName;
-//        this.contractNumber = String.valueOf(counterContractNumber.incrementAndGet());
-//        this.number = String.valueOf(counterNumber.incrementAndGet());
-//        this.openDate = LocalDate.now();
-//        this.expireDate = this.openDate.plusYears(bankCardType.getValidity());
-//        this.locked = false;
-//    }
+    public static Card fromCardSaveTo(CardSaveTo cardSaveTo, Client client, BankCardType bankCardType) {
+        Card card = new Card();
+        card.embossingName = cardSaveTo.getEmbossingName();
+        card.client = client;
+        card.bankCardType = bankCardType;
+        card.contractNumber = String.valueOf(counterContractNumber.incrementAndGet());
+        card.number = String.valueOf(counterNumber.incrementAndGet());
+        card.openDate = LocalDate.now();
+        card.expireDate = card.openDate.plusYears(bankCardType.getValidity());
+        card.locked = false;
+        return card;
+    }
 }
