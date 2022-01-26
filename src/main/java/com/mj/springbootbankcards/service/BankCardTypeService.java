@@ -5,7 +5,6 @@ import com.mj.springbootbankcards.repository.BankCardTypeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class BankCardTypeService {
@@ -16,27 +15,36 @@ public class BankCardTypeService {
         this.bankCardTypeRepository = bankCardTypeRepository;
     }
 
-    public BankCardType save(BankCardType bankCardType) {
+    public BankCardType add(BankCardType bankCardType) {
         return bankCardTypeRepository.save(bankCardType);
     }
 
-    public List<BankCardType> findAll() {
+    public void update(BankCardType bankCardType, int id) {
+        if (bankCardType.isNew()) {
+            bankCardType.setId(id);
+        } else if (bankCardType.getId() != id) {
+            throw new IllegalArgumentException(bankCardType + " must has id=" + id);
+        }
+        bankCardTypeRepository.save(bankCardType);
+    }
+
+    public List<BankCardType> getAll() {
         return bankCardTypeRepository.findAll();
     }
 
-    public List<BankCardType> findDebitBankCardTypes() {
+    public List<BankCardType> getDebit() {
         return bankCardTypeRepository.findDebitBankCardTypes();
     }
 
-    public List<BankCardType> findCreditBankCardTypes() {
+    public List<BankCardType> getCredit() {
         return bankCardTypeRepository.findCreditBankCardTypes();
     }
 
-    public Optional<BankCardType> findById(int id) {
-        return bankCardTypeRepository.findById(id);
+    public BankCardType get(int id) {
+        return bankCardTypeRepository.findById(id).get();
     }
 
-    public void deleteById(int id) {
+    public void delete(int id) {
         bankCardTypeRepository.deleteById(id);
     }
 }

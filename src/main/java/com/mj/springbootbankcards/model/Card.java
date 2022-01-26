@@ -1,59 +1,57 @@
 package com.mj.springbootbankcards.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.mj.springbootbankcards.to.CardSaveTo;
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Entity
 @Table(name = "card")
+@NamedEntityGraph(name = "Card.bankCardType", attributeNodes = @NamedAttributeNode("bankCardType"))
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(callSuper = true)
+@ToString(callSuper = true, exclude = {"bankCardType", "client"})
 public class Card extends BaseEntity {
 
-    private static final AtomicLong counterContractNumber = new AtomicLong(10000L);
-    private static final AtomicLong counterNumber = new AtomicLong(1000000000000000L);
+    public static final AtomicLong counterContractNumber = new AtomicLong(10000L);
+    public static final AtomicLong counterNumber = new AtomicLong(1000000000000000L);
 
+    @Column(name = "number", nullable = false, unique = true)
+    @NotBlank
+    @Size(min = 12, max = 20)
     private String number;
 
+    @Column(name = "contract_number", nullable = false, unique = true)
+    @NotBlank
     private String contractNumber;
 
+    @Column(name = "embossing_name", nullable = false)
+    @NotBlank
+    @Size(min = 3)
     private String embossingName;
 
-    private LocalDate openDate;
+    @Column(name = "open_date", nullable = false)
+    private LocalDate openDate = LocalDate.now();
 
+    @Column(name = "expire_date", nullable = false)
     private LocalDate expireDate;
 
-    private boolean locked;
+    @Column(name = "locked")
+    private boolean locked = false;
 
+    @Column(name = "lock_date")
     private LocalDate lockDate;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bank_card_type_id")
     private BankCardType bankCardType;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @ToString.Exclude
-    @JsonIgnore
+    @JoinColumn(name = "client_id")
     private Client client;
-
-    public static Card fromCardSaveTo(CardSaveTo cardSaveTo, Client client, BankCardType bankCardType) {
-        Card card = new Card();
-        card.number = String.valueOf(counterNumber.incrementAndGet());
-        card.contractNumber = String.valueOf(counterContractNumber.incrementAndGet());
-        card.embossingName = cardSaveTo.getEmbossingName();
-        card.openDate = LocalDate.now();
-        card.expireDate = card.openDate.plusYears(bankCardType.getValidity());
-        card.locked = false;
-        card.client = client;
-        card.bankCardType = bankCardType;
-        return card;
-    }
 }

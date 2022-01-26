@@ -1,6 +1,7 @@
 package com.mj.springbootbankcards.repository;
 
 import com.mj.springbootbankcards.model.Card;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,7 +16,9 @@ public interface CardRepository extends JpaRepository<Card, Integer> {
 
     Optional<Card> findByIdAndClientId(int id, int client);
 
-    List<Card> findCardsByClientId(int clientId);
+    @EntityGraph(value = "Card.bankCardType", type = EntityGraph.EntityGraphType.FETCH)
+    @Query("SELECT c FROM Card c WHERE c.client.id = :clientId")
+    List<Card> findCardsByClientIdWithType(int clientId);
 
     List<Card> findCardsByClientIdAndLockedIsFalse(int clientId);
 

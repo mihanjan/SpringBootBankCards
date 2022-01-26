@@ -6,16 +6,18 @@ import com.mj.springbootbankcards.model.Client;
 import com.mj.springbootbankcards.service.BankCardTypeService;
 import com.mj.springbootbankcards.service.CardService;
 import com.mj.springbootbankcards.service.ClientService;
-import com.mj.springbootbankcards.to.CardSaveTo;
+import com.mj.springbootbankcards.to.CardWithTypeTo;
+import com.mj.springbootbankcards.util.MapperUtil;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/clients/{clientId}/cards", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -27,45 +29,48 @@ public class CardController {
     private BankCardTypeService bankCardTypeService;
     @Autowired
     private ClientService clientService;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @GetMapping
-    public List<Card> getAll(@PathVariable int clientId) {
-        return cardService.findCardsByClientId(clientId);
+    public List<CardWithTypeTo> getAll(@PathVariable int clientId) {
+        return MapperUtil.convertList(cardService.getCards(clientId), card -> modelMapper.map(card, CardWithTypeTo.class));
     }
 
     @GetMapping("/active")
-    public List<Card> getAllActive(@PathVariable int clientId) {
-        return cardService.findCardsByClientIdAndLockedIsFalse(clientId);
+    public List<CardWithTypeTo> getAllActive(@PathVariable int clientId) {
+        return MapperUtil.convertList(cardService.getActiveCards(clientId), card -> modelMapper.map(card, CardWithTypeTo.class));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Card> get(@PathVariable int clientId,
-                                    @PathVariable int id) {
-        return ResponseEntity.of(cardService.findByIdAndClientId(id, clientId));
+    public ResponseEntity<CardWithTypeTo> get(@PathVariable int clientId,
+                                              @PathVariable int id) {
+        Card card = cardService.getCard(id, clientId);
+        return ResponseEntity.ok(modelMapper.map(card, CardWithTypeTo.class));
     }
 
     @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Card> create(@RequestBody CardSaveTo cardSaveTo,
-                                       @PathVariable int clientId,
-                                       @RequestParam int bankCardTypeId) {
-        Optional<Client> client = clientService.findById(clientId);
-        Optional<BankCardType> bankCardType = bankCardTypeService.findById(clientId);
-        Card created = cardService.save(cardSaveTo, client.get(), bankCardType.get());
+    public ResponseEntity<CardWithTypeTo> create(@Valid @RequestBody Card card,
+                                                 @PathVariable int clientId,
+                                                 @RequestParam int bankCardTypeId) {
+        Client client = clientService.findById(clientId);
+        BankCardType bankCardType = bankCardTypeService.get(bankCardTypeId);
+        Card created = cardService.save(card, client, bankCardType);
 
         URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/clients/" + clientId + "/cards/{id}")
                 .buildAndExpand(created.getId()).toUri();
-        return ResponseEntity.created(uriOfNewResource).body(created);
+        return ResponseEntity.created(uriOfNewResource).body(modelMapper.map(created, CardWithTypeTo.class));
     }
 
     @GetMapping(value = "/{id}/block")
-    public ResponseEntity<Card> block(@PathVariable int clientId,
-                                      @PathVariable int id) {
+    public ResponseEntity<CardWithTypeTo> block(@PathVariable int clientId,
+                                                @PathVariable int id) {
         cardService.blockCard(id, clientId);
-        Card blocked = cardService.findByIdAndClientId(id, clientId).get();
+        Card blocked = cardService.getCard(id, clientId);
         URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/clients/" + clientId + "/cards/{id}")
                 .buildAndExpand(blocked.getId()).toUri();
-        return ResponseEntity.created(uriOfNewResource).body(blocked);
+        return ResponseEntity.created(uriOfNewResource).body(modelMapper.map(blocked, CardWithTypeTo.class));
     }
 }

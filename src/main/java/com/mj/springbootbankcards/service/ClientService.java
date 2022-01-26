@@ -20,16 +20,25 @@ public class ClientService {
         return clientRepository.save(client);
     }
 
-    public Optional<Client> findById(int id) {
-        return clientRepository.findById(id);
+    public void update(Client client, int id) {
+        if (client.isNew()) {
+            client.setId(id);
+        } else if (client.getId() != id) {
+            throw new IllegalArgumentException(client + " must has id=" + id);
+        }
+        clientRepository.save(client);
+    }
+
+    public Client findById(int id) {
+        return clientRepository.findById(id).get();
     }
 
     public List<Client> findAll() {
         return clientRepository.findAll();
     }
 
-    public Optional<Client> findWithCards(int id) {
-        return clientRepository.findWithCards(id);
+    public Client findWithCards(int id) {
+        return clientRepository.findWithCards(id).get();
     }
 
     public void deleteById(int id) {

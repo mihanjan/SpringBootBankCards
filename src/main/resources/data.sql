@@ -7,5 +7,5 @@ INSERT INTO bankcardtype (card_type, credit_limit, embossing_name_length, freque
 VALUES ('CREDIT', 30000, 20, 1, 30, 10, 'MASTERCARD', 5),
        ('DEBIT', NULL, 20, 12, NULL, NULL, 'VISA', 3);
 
--- INSERT INTO card (contract_number, embossing_name, expire_date, lock_date, locked, number, open_date, bank_card_type_id, client_id)
--- VALUES (null, 'IVAN IVANOV', null, null, false, null, now(), 1, 1);
+INSERT INTO card (contract_number, embossing_name, expire_date, lock_date, locked, number, open_date, bank_card_type_id, client_id)
+VALUES (123, 'IVAN IVANOV', '01-01-2025', null, false, 1111111111111111, now(), 1, 1);

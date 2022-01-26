@@ -4,11 +4,9 @@ import com.mj.springbootbankcards.model.BankCardType;
 import com.mj.springbootbankcards.model.Card;
 import com.mj.springbootbankcards.model.Client;
 import com.mj.springbootbankcards.repository.CardRepository;
-import com.mj.springbootbankcards.to.CardSaveTo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CardService {
@@ -19,23 +17,28 @@ public class CardService {
         this.repository = repository;
     }
 
-    public Card save(CardSaveTo cardSaveTo, Client client, BankCardType bankCardType) {
-        return repository.save(Card.fromCardSaveTo(cardSaveTo, client, bankCardType));
+    public Card save(Card card, Client client, BankCardType bankCardType) {
+        card.setNumber(String.valueOf(Card.counterNumber.incrementAndGet()));
+        card.setContractNumber(String.valueOf(Card.counterContractNumber.incrementAndGet()));
+        card.setExpireDate(card.getOpenDate().plusYears(bankCardType.getValidity()));
+        card.setClient(client);
+        card.setBankCardType(bankCardType);
+        return repository.save(card);
     }
 
-    public Optional<Card> findByIdAndClientId(int id, int clientId) {
-        return repository.findByIdAndClientId(id, clientId);
+    public Card getCard(int id, int clientId) {
+        return repository.findByIdAndClientId(id, clientId).get();
     }
 
-    public List<Card> findCardsByClientId(int clientId) {
-        return repository.findCardsByClientId(clientId);
+    public List<Card> getCards(int clientId) {
+        return repository.findCardsByClientIdWithType(clientId);
     }
 
-    public List<Card> findCardsByClientIdAndLockedIsFalse(int clientId) {
+    public List<Card> getActiveCards(int clientId) {
         return repository.findCardsByClientIdAndLockedIsFalse(clientId);
     }
 
-    public int blockCard(int id, int clientId) {
-        return repository.blockCard(id, clientId);
+    public void blockCard(int id, int clientId) {
+        repository.blockCard(id, clientId);
     }
 }

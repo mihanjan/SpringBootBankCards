@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
@@ -21,27 +22,27 @@ public class BankCardTypesController {
 
     @GetMapping("/{id}")
     public ResponseEntity<BankCardType> get(@PathVariable int id) {
-        return ResponseEntity.of(bankCardTypeService.findById(id));
+        return ResponseEntity.ok(bankCardTypeService.get(id));
     }
 
     @GetMapping
     public List<BankCardType> getAll() {
-        return bankCardTypeService.findAll();
+        return bankCardTypeService.getAll();
     }
 
     @GetMapping("/debit")
     public List<BankCardType> getDebit() {
-        return bankCardTypeService.findDebitBankCardTypes();
+        return bankCardTypeService.getDebit();
     }
 
     @GetMapping("/credit")
     public List<BankCardType> getCredit() {
-        return bankCardTypeService.findCreditBankCardTypes();
+        return bankCardTypeService.getCredit();
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<BankCardType> create(@RequestBody BankCardType bankCardType) {
-        BankCardType created = bankCardTypeService.save(bankCardType);
+    public ResponseEntity<BankCardType> create(@Valid @RequestBody BankCardType bankCardType) {
+        BankCardType created = bankCardTypeService.add(bankCardType);
         URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("clients/{id}")
                 .buildAndExpand(created.getId()).toUri();
@@ -50,18 +51,13 @@ public class BankCardTypesController {
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void update(@RequestBody BankCardType bankCardType, @PathVariable int id) {
-        if (bankCardType.isNew()) {
-            bankCardType.setId(id);
-        } else if (bankCardType.getId() != id) {
-            throw new IllegalArgumentException(bankCardType + " must has id=" + id);
-        }
-        bankCardTypeService.save(bankCardType);
+    public void update(@Valid @RequestBody BankCardType bankCardType, @PathVariable int id) {
+        bankCardTypeService.update(bankCardType, id);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable int id) {
-        bankCardTypeService.deleteById(id);
+        bankCardTypeService.delete(id);
     }
 }
