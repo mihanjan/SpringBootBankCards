@@ -3,6 +3,9 @@ spring:
     url: jdbc:postgresql://localhost:5432/sb-bank-cards
     username: user
     password: password
+  sql:
+    init:
+      mode: always
 
   jpa:
     show-sql: true
@@ -16,10 +19,3 @@ spring:
       #  http://docs.jboss.org/hibernate/orm/5.3/userguide/html_single/Hibernate_User_Guide.html#configurations
       hibernate:
         format_sql: true
-        default_batch_fetch_size: 10
-        # https://stackoverflow.com/questions/21257819/what-is-the-difference-between-hibernate-jdbc-fetch-size-and-hibernate-jdbc-batc
-        jdbc.batch_size: 10
-
-  sql:
-    init:
-      mode: always

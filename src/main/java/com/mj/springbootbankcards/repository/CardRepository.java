@@ -14,12 +14,16 @@ import java.util.Optional;
 @Repository
 public interface CardRepository extends JpaRepository<Card, Integer> {
 
-    Optional<Card> findByIdAndClientId(int id, int client);
+    @EntityGraph(value = "Card.bankCardType", type = EntityGraph.EntityGraphType.FETCH)
+    @Query("SELECT c FROM Card c WHERE c.id = :id AND c.client.id = :clientId")
+    Optional<Card> findByIdAndClientId(int id, int clientId);
 
     @EntityGraph(value = "Card.bankCardType", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT c FROM Card c WHERE c.client.id = :clientId")
     List<Card> findCardsByClientIdWithType(int clientId);
 
+    @EntityGraph(value = "Card.bankCardType", type = EntityGraph.EntityGraphType.FETCH)
+    @Query("SELECT c FROM Card c WHERE c.client.id = :clientId AND c.locked = false")
     List<Card> findCardsByClientIdAndLockedIsFalse(int clientId);
 
     @Transactional

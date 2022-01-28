@@ -32,7 +32,6 @@ public class Client extends BaseEntity {
     private String lastName;
 
     @Column(name = "middle_name")
-    @NotBlank
     @Size(min = 2, max = 100)
     private String middleName;
 

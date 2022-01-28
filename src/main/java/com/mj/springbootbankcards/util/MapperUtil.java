@@ -1,5 +1,6 @@
 package com.mj.springbootbankcards.util;
 
+import lombok.experimental.UtilityClass;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

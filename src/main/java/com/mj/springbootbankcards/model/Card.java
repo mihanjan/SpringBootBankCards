@@ -53,5 +53,6 @@ public class Card extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
+
     private Client client;
 }
